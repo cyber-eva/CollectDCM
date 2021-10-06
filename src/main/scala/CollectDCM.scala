@@ -35,24 +35,28 @@ object CollectDCM {
 
     val data_date = data_work.withColumn("date",concat_ws(":",$"date",$"hour"))
 
-    val data_agg = data_date.
-      groupBy(
-        $"utm_source",
-        $"utm_medium",
-        $"utm_campaign",
-        $"utm_content",
-        $"utm_term",
-        $"profile_id",
-        $"ad_id",
-        $"creative_id",
-        $"date"
-      ).agg(
-      sum($"views").as("views"),
-      sum($"clicks").as("clicks"),
-      sum($"impressions").as("impressions")
-    )
+    val data_session = data_date.withColumn("sessions",lit(0))
 
-    data_agg.
+    val data_hts = data_session.withColumn("HitTimeStamp",unix_timestamp($"date","yyyy-MM-dd:HH") + 106000) //Moscow time zone
+
+//    val data_agg = data_date.
+//      groupBy(
+//        $"utm_source",
+//        $"utm_medium",
+//        $"utm_campaign",
+//        $"utm_content",
+//        $"utm_term",
+//        $"profile_id",
+//        $"ad_id",
+//        $"creative_id",
+//        $"date"
+//      ).agg(
+//      sum($"views").as("views"),
+//      sum($"clicks").as("clicks"),
+//      sum($"impressions").as("impressions")
+//    )
+
+    data_hts.
       write.format("csv").
       option("header","true").
       mode("overwrite").
